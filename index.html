@@ -100,25 +100,30 @@
     }
     .red-streak {
       position: absolute;
-      width: 90%;
-      height: 18px;
+      width: 400px;
+      height: 300px;
       top: 50%;
-      left: 5%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       z-index: -1;
-      background: #c0392b;
-      border-radius: 40% 10% 20% 50%;
-      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 20'%3E%3Cpath d='M0 12 Q30 2 80 10 Q150 18 200 8 Q260 0 320 11 Q370 17 400 7' stroke='black' stroke-width='14' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-      -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 20'%3E%3Cpath d='M0 12 Q30 2 80 10 Q150 18 200 8 Q260 0 320 11 Q370 17 400 7' stroke='black' stroke-width='14' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-      mask-size: 100% 100%;
-      -webkit-mask-size: 100% 100%;
-      opacity: 0.85;
-      transition: background-color 0.8s ease, opacity 0.8s ease;
+      pointer-events: none;
+      transition: opacity 0.8s ease;
     }
-    body.inverted .red-streak {
+    .red-streak .rs-feather {
+      position: absolute;
+      left: 50%;
+      top: 60%;
+      transform-origin: 0% 50%;
+      background: #c0392b;
+      border-radius: 0 1px 1px 0;
+      transition: background-color 0.8s ease;
+    }
+    body.inverted .rs-feather {
       background: #fff;
     }
     @media (prefers-reduced-motion: reduce) {
       .red-streak { transition: none; }
+      .red-streak .rs-feather { transition: none; }
     }
 
     .lens-area {
@@ -155,16 +160,12 @@
     .lens-btn {
       display: inline-block;
       margin: 1rem auto;
-      padding: 0.5rem 1rem;
-      font-family: 'Times New Roman', Times, serif;
+      padding: 0.25rem 0.75rem;
+      font-family: inherit;
       font-size: 0.9rem;
-      background: none;
-      border: 1px solid currentColor;
       cursor: pointer;
-      color: inherit;
+      /* default browser button appearance */
     }
-    .lens-btn:hover { background: #f3f3f3; }
-    body.inverted .lens-btn:hover { background: #333; }
 
     .p1-figure {
       margin: 1.5rem 0;
@@ -247,7 +248,7 @@
       position: absolute;
       padding: 0.75rem 1.25rem;
       border: 1px solid currentColor;
-      background: inherit;
+      background: #fff;
       cursor: grab;
       user-select: none;
       touch-action: none;
@@ -260,6 +261,7 @@
     .drag-rect.active {
       pointer-events: auto;
     }
+    body.inverted .drag-rect { background: #000; }
     .drag-rect.dragging { cursor: grabbing; z-index: 10 !important; }
     .drag-rect.dismissed { opacity: 0.15; pointer-events: none; }
 
@@ -1002,9 +1004,50 @@ const LENS_STATES = [
 ];
 let lensIndex = 0;
 
+function buildRedStreak() {
+  const container = document.getElementById('red-streak');
+  container.innerHTML = '';
+  // Primary feathers — same angles/lengths as wing
+  for (let i = 0; i < 9; i++) {
+    const angle = -15 - i * 16.5;
+    const len = 180 + i * 10;
+    const f = document.createElement('div');
+    f.className = 'rs-feather';
+    f.style.width = len + 'px';
+    f.style.height = '2px';
+    f.style.transform = 'rotateZ(' + angle + 'deg)';
+    container.appendChild(f);
+  }
+  // Secondary feathers
+  for (let i = 0; i < 12; i++) {
+    const angle = -10 - i * 13;
+    const len = 100 + i * 6;
+    const f = document.createElement('div');
+    f.className = 'rs-feather';
+    f.style.width = len + 'px';
+    f.style.height = '1px';
+    f.style.opacity = '0.7';
+    f.style.transform = 'rotateZ(' + angle + 'deg)';
+    container.appendChild(f);
+  }
+  // Tertiary feathers
+  for (let i = 0; i < 14; i++) {
+    const angle = -8 - i * 10;
+    const len = 50 + i * 4;
+    const f = document.createElement('div');
+    f.className = 'rs-feather';
+    f.style.width = len + 'px';
+    f.style.height = '1px';
+    f.style.opacity = '0.35';
+    f.style.transform = 'rotateZ(' + angle + 'deg)';
+    container.appendChild(f);
+  }
+}
+
 registerPart(1, [
   // Step 0: Show opening line + red streak
   function(done) {
+    buildRedStreak();
     const line = document.querySelector('#part-1 .line[data-step="0"]');
     line.classList.add('visible');
     setTimeout(done, prefersReducedMotion() ? 100 : 800);
