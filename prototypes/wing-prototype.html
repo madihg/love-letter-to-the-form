@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wing Prototype — Love Letter to the Form</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      margin: 0;
+      padding: 0;
+      background-color: #fff;
+      color: #000;
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* -------------------------------------------------------
+       POETRY SECTION — simulates the end of the piece
+    ------------------------------------------------------- */
+    .poem-ending {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .poem-ending .line {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+      margin-bottom: 0.5em;
+      font-size: 1.25rem;
+    }
+
+    .poem-ending .line.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .poem-ending .line.last {
+      font-style: italic;
+      color: #666;
+      margin-top: 1.5em;
+    }
+
+    .advance-arrow {
+      display: block;
+      margin: 2rem auto;
+      padding: 0.75rem 1.5rem;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 1.5rem;
+      background: none;
+      border: 1px solid #000;
+      cursor: pointer;
+      color: #000;
+      transition: background-color 0.3s ease;
+      opacity: 0;
+    }
+
+    .advance-arrow.visible {
+      opacity: 1;
+    }
+
+    .advance-arrow:hover {
+      background: #f3f3f3;
+    }
+
+    .advance-arrow:focus-visible {
+      outline: 2px solid #000;
+      outline-offset: 2px;
+    }
+
+    /* -------------------------------------------------------
+       FOOTNOTE
+    ------------------------------------------------------- */
+    .footnote-marker {
+      cursor: pointer;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.75rem;
+      vertical-align: super;
+      margin-left: 2px;
+      color: #999;
+    }
+
+    .footnote-marker:hover {
+      color: #000;
+    }
+
+    .footnote-box {
+      display: none;
+      background: #fff;
+      color: #000;
+      border: 1px solid #000;
+      padding: 1rem;
+      max-width: min(500px, 85vw);
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      margin-top: 1rem;
+      position: relative;
+    }
+
+    .footnote-box.open {
+      display: block;
+    }
+
+    /* -------------------------------------------------------
+       WING CONTAINER — the stage
+    ------------------------------------------------------- */
+    .wing-stage {
+      width: 100%;
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      opacity: 0;
+      transition: opacity 1.5s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .wing-stage.visible {
+      opacity: 1;
+    }
+
+    .wing-stage-label {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.7rem;
+      color: #ccc;
+      letter-spacing: 0.15em;
+      margin-bottom: 3rem;
+      text-transform: lowercase;
+      opacity: 0;
+      transition: opacity 1s ease 0.8s;
+    }
+
+    .wing-stage.visible .wing-stage-label {
+      opacity: 1;
+    }
+
+    /* -------------------------------------------------------
+       3D WING
+    ------------------------------------------------------- */
+    .wing-perspective {
+      perspective: 1200px;
+      perspective-origin: 50% 50%;
+      width: 100%;
+      max-width: 600px;
+      height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .wing-body {
+      transform-style: preserve-3d;
+      position: relative;
+      width: 100%;
+      height: 100%;
+      /* the wing tilts slightly in 3D space at rest */
+      transform: rotateY(-15deg) rotateX(5deg);
+      transition: transform 0.1s ease;
+    }
+
+    .wing-body.flapping {
+      /* animation applied via JS */
+    }
+
+    /* -------------------------------------------------------
+       FEATHERS — thin rectangles arranged in a fan
+    ------------------------------------------------------- */
+    .feather {
+      position: absolute;
+      left: 50%;
+      bottom: 50%;
+      transform-origin: 0% 100%; /* hinge at the base (bottom-left of feather) */
+      transform-style: preserve-3d;
+      /* base state: each feather is rotated by its --angle */
+      transform:
+        rotateZ(var(--angle))
+        rotateY(var(--y-tilt, 0deg))
+        translateZ(var(--z-offset, 0px));
+      width: var(--length, 200px);
+      height: var(--thickness, 1px);
+      background: #000;
+      transition: transform 0.1s ease;
+    }
+
+    /* feather text fragments */
+    .feather-text {
+      position: absolute;
+      top: -1.2em;
+      left: 20%;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 0.6rem;
+      color: #999;
+      white-space: nowrap;
+      pointer-events: none;
+      letter-spacing: 0.05em;
+      transform-origin: left center;
+      /* keep text readable despite parent rotation */
+    }
+
+    /* slightly thicker "primary" feathers */
+    .feather.primary {
+      height: 2px;
+    }
+
+    .feather.secondary {
+      height: 1px;
+      opacity: 0.7;
+    }
+
+    .feather.tertiary {
+      height: 1px;
+      opacity: 0.4;
+    }
+
+    /* thin cross-bars to suggest structure */
+    .feather-bar {
+      position: absolute;
+      left: 50%;
+      bottom: 50%;
+      transform-origin: 0% 100%;
+      width: 1px;
+      height: var(--bar-length, 80px);
+      background: #ccc;
+      transform: rotateZ(var(--bar-angle)) translateZ(var(--z-offset, 0px));
+      opacity: 0.3;
+    }
+
+    /* -------------------------------------------------------
+       FLAP ANIMATION KEYFRAMES
+       The flap is a rotation around the X axis at the base.
+       Each feather also gets a slight individual delay via
+       custom property --delay for an organic ripple.
+    ------------------------------------------------------- */
+    @keyframes flap {
+      0% {
+        transform: rotateY(-15deg) rotateX(5deg);
+      }
+      15% {
+        transform: rotateY(-10deg) rotateX(-35deg);
+      }
+      35% {
+        transform: rotateY(-18deg) rotateX(15deg);
+      }
+      55% {
+        transform: rotateY(-12deg) rotateX(-20deg);
+      }
+      75% {
+        transform: rotateY(-16deg) rotateX(8deg);
+      }
+      100% {
+        transform: rotateY(-15deg) rotateX(5deg);
+      }
+    }
+
+    @keyframes feather-flex {
+      0% {
+        transform:
+          rotateZ(var(--angle))
+          rotateY(var(--y-tilt, 0deg))
+          translateZ(var(--z-offset, 0px));
+      }
+      15% {
+        transform:
+          rotateZ(calc(var(--angle) + var(--flex-amount, 3deg)))
+          rotateY(calc(var(--y-tilt, 0deg) + 8deg))
+          translateZ(var(--z-offset, 0px));
+      }
+      35% {
+        transform:
+          rotateZ(calc(var(--angle) - var(--flex-amount, 3deg) * 0.5))
+          rotateY(calc(var(--y-tilt, 0deg) - 4deg))
+          translateZ(var(--z-offset, 0px));
+      }
+      55% {
+        transform:
+          rotateZ(calc(var(--angle) + var(--flex-amount, 3deg) * 0.3))
+          rotateY(calc(var(--y-tilt, 0deg) + 3deg))
+          translateZ(var(--z-offset, 0px));
+      }
+      100% {
+        transform:
+          rotateZ(var(--angle))
+          rotateY(var(--y-tilt, 0deg))
+          translateZ(var(--z-offset, 0px));
+      }
+    }
+
+    .wing-body.flapping {
+      animation: flap 2.8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+    }
+
+    .wing-body.flapping .feather {
+      animation: feather-flex 2.8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+      animation-delay: var(--delay, 0s);
+    }
+
+    /* -------------------------------------------------------
+       HINT TEXT below the wing
+    ------------------------------------------------------- */
+    .wing-hint {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.65rem;
+      color: #ccc;
+      margin-top: 3rem;
+      letter-spacing: 0.1em;
+      transition: opacity 0.5s ease;
+    }
+
+    .wing-hint.hidden {
+      opacity: 0;
+    }
+
+    /* -------------------------------------------------------
+       prefers-reduced-motion
+    ------------------------------------------------------- */
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      .poem-ending .line {
+        transition: none;
+        transform: none;
+      }
+
+      .poem-ending .line.visible {
+        opacity: 1;
+      }
+
+      .advance-arrow {
+        transition: none;
+      }
+
+      .wing-stage {
+        transition: none;
+      }
+
+      .wing-stage.visible .wing-stage-label {
+        transition: none;
+      }
+
+      .wing-body.flapping {
+        animation: none;
+        /* for reduced-motion, just do a subtle single tilt */
+        transform: rotateY(-15deg) rotateX(-10deg);
+        transition: transform 0.8s ease;
+      }
+
+      .wing-body.flapping .feather {
+        animation: none;
+      }
+
+      .wing-hint {
+        transition: none;
+      }
+
+      .feather {
+        transition: none;
+      }
+
+      .footnote-box {
+        transition: none;
+      }
+    }
+
+    /* -------------------------------------------------------
+       MOBILE
+    ------------------------------------------------------- */
+    @media (max-width: 600px) {
+      .poem-ending {
+        padding: 2rem 1rem;
+      }
+
+      .poem-ending .line {
+        font-size: 1.1rem;
+      }
+
+      .wing-perspective {
+        height: 300px;
+        max-width: 100%;
+      }
+
+      .wing-hint {
+        font-size: 0.6rem;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .wing-perspective {
+        height: 250px;
+      }
+    }
+
+    /* -------------------------------------------------------
+       SCREEN READER ONLY
+    ------------------------------------------------------- */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===================================================
+       SIMULATED POEM ENDING (Part 5 tail)
+       In the real piece, the wing appears after Part 5
+       completes. Here we simulate the last few lines.
+  =================================================== -->
+  <section class="poem-ending" aria-label="End of poem">
+    <div class="line" data-step="0">
+      I write about the psychic mirror that turns accident into story
+    </div>
+    <div class="line" data-step="1">
+      and the side characters each of us are
+    </div>
+    <div class="line" data-step="2">
+      into hailed muscled heroes.
+      <span class="footnote-marker" role="button" tabindex="0" aria-expanded="false" aria-label="Open footnote">*</span>
+    </div>
+    <div class="footnote-box" id="footnote-5" role="tooltip">
+      If poetry is the red skin of an obstacle the hero needs to shoot down with an arrow dipped in the hydra's blood, then web poetry is the wing. Maybe a concealing device when folded at a sharp angle. But mostly a troubling -- or better yet, a fucking up -- of a body's relationship to gravity. An insult to physics. Wide and graceful.
+    </div>
+    <div class="line last" data-step="3">
+      <!-- this empty line acts as the beat before the wing -->
+    </div>
+
+    <button class="advance-arrow" aria-label="Continue to the wing">&rarr;</button>
+  </section>
+
+  <!-- ===================================================
+       THE WING — closing image of the poem
+  =================================================== -->
+  <section class="wing-stage" id="wing-stage" aria-label="The wing">
+    <h2 class="sr-only">The Wing</h2>
+
+    <div class="wing-stage-label" aria-hidden="true">the wing</div>
+
+    <div class="wing-perspective" role="img" aria-label="A geometric wing made of thin lines, arranged in a fan shape. Click to make it flap.">
+      <div class="wing-body" id="wing-body">
+        <!-- Feathers and structure are generated by JS -->
+      </div>
+    </div>
+
+    <div class="wing-hint" id="wing-hint">click to flap</div>
+  </section>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // ---------------------------------------------------
+      // UTILITY
+      // ---------------------------------------------------
+      function prefersReducedMotion() {
+        return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      }
+
+      // ---------------------------------------------------
+      // POEM ENDING SEQUENCING
+      // ---------------------------------------------------
+      const lines = document.querySelectorAll('.poem-ending .line');
+      const arrow = document.querySelector('.advance-arrow');
+      const wingStage = document.getElementById('wing-stage');
+      let currentStep = 0;
+      let poemDone = false;
+
+      function showNextLine() {
+        if (currentStep < lines.length) {
+          lines[currentStep].classList.add('visible');
+          currentStep++;
+          if (currentStep >= lines.length) {
+            // show arrow after a beat
+            setTimeout(function () {
+              arrow.classList.add('visible');
+            }, 800);
+          }
+        }
+      }
+
+      // auto-advance the poem lines on click anywhere in the poem section
+      document.querySelector('.poem-ending').addEventListener('click', function (e) {
+        if (poemDone) return;
+        if (e.target.closest('.advance-arrow')) return;
+        if (e.target.closest('.footnote-marker')) return;
+        if (e.target.closest('.footnote-box')) return;
+        showNextLine();
+      });
+
+      // start with first line visible
+      setTimeout(showNextLine, 400);
+
+      // arrow => show wing
+      arrow.addEventListener('click', function () {
+        poemDone = true;
+        wingStage.classList.add('visible');
+        if (prefersReducedMotion()) {
+          wingStage.scrollIntoView({ block: 'center' });
+        } else {
+          wingStage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+
+      // keyboard for arrow
+      arrow.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          arrow.click();
+        }
+      });
+
+      // ---------------------------------------------------
+      // FOOTNOTE
+      // ---------------------------------------------------
+      var fnMarker = document.querySelector('.footnote-marker');
+      var fnBox = document.getElementById('footnote-5');
+
+      if (fnMarker && fnBox) {
+        fnMarker.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var isOpen = fnBox.classList.contains('open');
+          fnBox.classList.toggle('open');
+          fnMarker.setAttribute('aria-expanded', String(!isOpen));
+        });
+
+        fnMarker.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            fnMarker.click();
+          }
+        });
+
+        document.addEventListener('click', function (e) {
+          if (!e.target.closest('.footnote-box') && !e.target.closest('.footnote-marker')) {
+            fnBox.classList.remove('open');
+            fnMarker.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
+
+      // ---------------------------------------------------
+      // WING CONSTRUCTION
+      // ---------------------------------------------------
+      var wingBody = document.getElementById('wing-body');
+
+      // Text fragments that can appear on certain feathers
+      var textFragments = [
+        'the wing',
+        'wide and graceful',
+        'an insult to physics',
+        'a concealing device',
+        'web poetry',
+        'the red skin',
+        'the hydra\'s blood',
+        'folded at a sharp angle',
+        'a troubling',
+        'of gravity',
+      ];
+
+      // Feather configuration:
+      // We build a fan of feathers radiating from a single point (the wing's shoulder).
+      // Primary feathers: long, thick, the outer edge of the wing
+      // Secondary feathers: medium, thinner, the inner curve
+      // Tertiary feathers: short, faintest, structural fill
+
+      var feathers = [];
+
+      // Spread angle range: from about -10deg (pointing slightly right-upward)
+      // to about -170deg (pointing slightly right-downward, wrapping over the top)
+      // This creates a roughly 160-degree fan — wide and graceful.
+
+      // PRIMARY feathers (the long outer ones) — 9 feathers
+      var primaryCount = 9;
+      for (var i = 0; i < primaryCount; i++) {
+        var t = i / (primaryCount - 1); // 0 to 1
+        var angle = -15 + t * -145; // -15deg to -160deg
+        var length = 180 + Math.sin(t * Math.PI) * 90; // longer in the middle, shorter at edges
+        var yTilt = -5 + t * 15; // slight 3D tilt variation
+        var zOffset = -2 + t * 6; // layering in Z
+        var textIndex = i < textFragments.length ? i : -1;
+        feathers.push({
+          type: 'primary',
+          angle: angle,
+          length: length,
+          yTilt: yTilt,
+          zOffset: zOffset,
+          delay: t * 0.12, // animation delay for ripple
+          flexAmount: 2 + Math.sin(t * Math.PI) * 4,
+          text: textIndex >= 0 && textIndex % 3 === 0 ? textFragments[textIndex] : null
+        });
+      }
+
+      // SECONDARY feathers (the inner layer) — 12 feathers
+      var secondaryCount = 12;
+      for (var i = 0; i < secondaryCount; i++) {
+        var t = i / (secondaryCount - 1);
+        var angle = -10 + t * -150;
+        var length = 100 + Math.sin(t * Math.PI) * 70;
+        var yTilt = -3 + t * 10;
+        var zOffset = -4 + t * 4;
+        var fragIdx = 3 + Math.floor(t * 4);
+        feathers.push({
+          type: 'secondary',
+          angle: angle,
+          length: length,
+          yTilt: yTilt,
+          zOffset: zOffset,
+          delay: t * 0.1 + 0.02,
+          flexAmount: 1.5 + Math.sin(t * Math.PI) * 3,
+          text: i % 4 === 2 && fragIdx < textFragments.length ? textFragments[fragIdx] : null
+        });
+      }
+
+      // TERTIARY feathers (fine fill) — 18 feathers
+      var tertiaryCount = 18;
+      for (var i = 0; i < tertiaryCount; i++) {
+        var t = i / (tertiaryCount - 1);
+        var angle = -8 + t * -155;
+        var length = 50 + Math.sin(t * Math.PI) * 50;
+        var yTilt = -2 + t * 8;
+        var zOffset = -6 + t * 3;
+        feathers.push({
+          type: 'tertiary',
+          angle: angle,
+          length: length,
+          yTilt: yTilt,
+          zOffset: zOffset,
+          delay: t * 0.08 + 0.04,
+          flexAmount: 1 + Math.sin(t * Math.PI) * 2,
+          text: null
+        });
+      }
+
+      // Also add a few structural "bars" — cross-hatching near the base
+      var bars = [];
+      for (var i = 0; i < 5; i++) {
+        var t = i / 4;
+        bars.push({
+          angle: -30 + t * -100,
+          length: 60 + t * 40,
+          zOffset: -3 + t * 2
+        });
+      }
+
+      // Build DOM
+      feathers.forEach(function (f) {
+        var el = document.createElement('div');
+        el.className = 'feather ' + f.type;
+        el.style.setProperty('--angle', f.angle + 'deg');
+        el.style.setProperty('--length', f.length + 'px');
+        el.style.setProperty('--y-tilt', f.yTilt + 'deg');
+        el.style.setProperty('--z-offset', f.zOffset + 'px');
+        el.style.setProperty('--delay', f.delay + 's');
+        el.style.setProperty('--flex-amount', f.flexAmount + 'deg');
+
+        // Width set via --length
+        el.style.width = 'var(--length)';
+
+        if (f.text) {
+          var textEl = document.createElement('span');
+          textEl.className = 'feather-text';
+          textEl.textContent = f.text;
+          el.appendChild(textEl);
+        }
+
+        wingBody.appendChild(el);
+      });
+
+      bars.forEach(function (b) {
+        var el = document.createElement('div');
+        el.className = 'feather-bar';
+        el.style.setProperty('--bar-angle', b.angle + 'deg');
+        el.style.setProperty('--bar-length', b.length + 'px');
+        el.style.setProperty('--z-offset', b.zOffset + 'px');
+        wingBody.appendChild(el);
+      });
+
+      // ---------------------------------------------------
+      // FLAP INTERACTION
+      // ---------------------------------------------------
+      var isFlapping = false;
+      var wingHint = document.getElementById('wing-hint');
+
+      function triggerFlap() {
+        if (isFlapping) return;
+        isFlapping = true;
+
+        if (wingHint) {
+          wingHint.classList.add('hidden');
+        }
+
+        wingBody.classList.remove('flapping');
+        // Force reflow to restart animation
+        void wingBody.offsetWidth;
+        wingBody.classList.add('flapping');
+
+        // Duration matches the CSS animation
+        var duration = prefersReducedMotion() ? 800 : 2800;
+        setTimeout(function () {
+          wingBody.classList.remove('flapping');
+          isFlapping = false;
+          // restore hint after first flap
+        }, duration);
+      }
+
+      wingStage.addEventListener('click', function (e) {
+        if (e.target.closest('.wing-stage-label')) return;
+        triggerFlap();
+      });
+
+      // Keyboard: space/enter on the wing stage
+      wingStage.setAttribute('tabindex', '0');
+      wingStage.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          triggerFlap();
+        }
+      });
+
+      // ---------------------------------------------------
+      // MOBILE: scale feathers for smaller screens
+      // ---------------------------------------------------
+      function scaleForViewport() {
+        var vw = window.innerWidth;
+        var scale = 1;
+        if (vw < 600) {
+          scale = vw / 600;
+        }
+        // Apply scale to the wing perspective container if needed
+        var perspective = document.querySelector('.wing-perspective');
+        if (scale < 1) {
+          perspective.style.transform = 'scale(' + Math.max(scale, 0.5) + ')';
+        } else {
+          perspective.style.transform = '';
+        }
+      }
+
+      scaleForViewport();
+      window.addEventListener('resize', scaleForViewport);
+
+    })();
+  </script>
+</body>
+</html>

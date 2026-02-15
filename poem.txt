@@ -1,0 +1,55 @@
+Love letter to the form
+
+WEB GUIDELINES AND PRINCIPLES
+this should be responsive and always work on mobile
+it should be on one page
+?? [[there are two versions of this – presentation mode and non-presentation mode]]
+each interaction under web opens or kickstarts the next interaction
+to sequence things and how text appears look under web, the sentences that are animated appear one after another, once one web interaction or animation is done, the next one appears.
+footnotes appea as either asterisks or some similar cryptic sing floating next to the last word of each part when clicking on it the text in the footnote appears as a white rectangle with black text inside and thin black border.
+ask all the questions you need to ask as to how to transition from one web interaction to another – 
+
+PART 1
+TEXT: In “Autobiography of Red”, the camera acts as Geryon’s emotional regulator. // The lens is a locked bedroom door. A border. And borders, as you get to know them, reveal themselves as more than enclosures. Borders filter, sort, peel // the figure from the ground.
+WEB:
+In “Autobiography of Red”, the camera acts as Geryon’s emotional regulator – there is a red elegant streak that appears behind the text and stays on the screen
+The lens is a locked bedroom door. A border – i click on a button that says “the lens” and a round lens appears over “is a locked bedroom door” when i clicked the button again “is a locked bedroom door” becomes “a border”. i click again it bcomes a“And borders, as you get to know them,”-- click again it becomes reveal themselves as more than enclosures. the round lens is a black circle and the circle should appear the way you’d expect an opticians lens to appear to test your eyesight. clicking one more time triggers the next bit and animation.
+the figure from the ground – The red streak in the back becomes white and the rest of the background becomes black the text becomes white. clicking one more time triggers the next part and animation.
+FOOTNOTE: Each border has a flavor, a taste. The aesthetics of semantics and the poetics of interface somatics are two boldly-flavored summer ice cream scoops. Pistachio and Melon. Chocolate and balsamic strawberry. That’s a thing.
+
+PART 2
+TEXT: I am not hiding. I am peeling parts – if you were to see me – really see me – we would both blush and so I build borders – the interface a drag sequin bodysuit drag of course both gesture and posture. It’s hard to write a straight text anymore and so I write in code.
+WEB: 
+each of the words of “I am not trying to hide” is on a slot machine. when i click the first time it turns into “i am trying to hide” (not gives space to a blank space). second time: “I am trying”. third time: “i am not”. fourth time: “i am” – at that point the screen shifts back from black to white and text from white to black. clicking one more time triggers the next animation.
+“I am peeling parts – if you were to see me – really see me – we would both blush – and so I build borders” each of the parts separated by – appear sequentially as i click on the screen, one above the other as if they’re stacked to build a wall. clicking one more time triggers the next animation.
+the interface / a drag / sequin bodysuit / drag / of course both / gesture and / posture – each of the words i separate with a / is in an individual black rectangle thin border i drag a way with the interface on top and the rest sequentially behind.
+it’s hard to write a straight text anymore – the text itself curls when i get the mouse close to it. clicking one more time triggers the next part and animation.
+FOOTNOTE: As I write this, I realize I am dodging the heaviness of language by conjuring interface. “It’s interactive”, “code is part and parcel of this poem” … Interface is a way to buffer emotional risk. Lower the psychological stakes of the poet. And my costuming of poetry becomes both preening and pruning. Again, drag.
+
+PART 3
+TEXT: Take my face for instance. We would never lock eyes. I am not shy. I am letting on exactly as much as our encounter demands. Take the maiko’s eyes. She runs her irises with an iron fist, logs her stares. To look you in the eyes would be as flagrant as bombing the ribs of a mountain.
+WEB: 
+Take my face for instance – opens a camera so the audience can see my face
+I am not shy – Shy becomes bold, then jumps then grows in size rapidly and sequentially.
+Take the maiko’s eyes. She runs her irises with an iron fist, logs her stares. To look you in the eyes would be – two eyes, as the mouse moves, the irises follow the mouse, when the mouse pauses in the center zone for 3 seconds, a small explosion ensues meaning the words and the pixels do an exploding animation outward and vanish / fade out. clicking one more time triggers the next part and animation.
+FOOTNOTE: There are 2 epistemologies here. Each with its own vocabulary of concealment. Dancing, slipping in a sweaty duel. Web somatics might add latency to the poetic punch. Poetic language troubles the directness of interface. 
+
+PART 4
+TEXT: Like the maiko, my economy of feelings is a management of asymmetry. Cruel not like a destiny, rather like Heracles towards Geryon in Anne Carson’s book. Often tragedy isn’t violent, it just doesn’t care enough. It is devastating in how its ordinariness meets our infatuation. And so I dole out exactly what this encounter demands. I wield asymmetry.
+WEB:
+Like the maiko, my economy of feelings is a management of asymmetry – at first only “Like the maiko, my economy of feelings” appears with an oblique line to its right side and as i drag words from left to write the words turn one by one into each of the words “is a management of asymmetry”.
+Cruel not like a destiny, rather like Heracles towards Geryon in Anne Carson’s book. Often tragedy isn’t violent, it just doesn’t care enough. It is devastating in how its ordinariness meets our infatuation. – for this entire passage the words appear one by one and then kinda float away and off the screen.
+clicking one more time triggers the next part and animation.
+FOOTNOTE: This might me a good time to talk about domination. How my body control kink leaches into my poetry. How I study the body of the words I choose. 
+
+PART 5
+TEXT: And I am not writing about power. Believe me, I only write about one thing: Love / Money / Fasting / The synapse. The negative space of mind. The electric reach of every excited neuron. I write about the psychic mirror that turns accident into story and the side characters each of us are into hailed muscled heroes. 
+WEB: for the below, except where there are instructions by me figure out a cool contextually relevant way to display / animate the words, what about a drop down for instance or a slider or… etc. think up html elements that could be relevant.
+And I am not writing about power. 
+Believe me, 
+I only write about one thing
+Love / Money / Fasting / The synapse – love appears first, when i click, it glitches, and money appears. click again and money appears again fasting appears, again, the synapse appears.
+The negative space of mind. 
+The electric reach of every pumped neuron.
+I write about the psychic mirror that turns accident into story and the side characters each of us are into hailed muscled heroes.
+FOOTNOTE: If poetry is the red skin of an obstacle the hero needs to shoot down with an arrow dipped in the hydra’s blood, then web poetry is the wing. Maybe a concealing device when folded at a sharp angle. But mostly a troubling – or better yet, a fucking up – of a body’s relationship to gravity. An insult to physics. Wide and graceful.
